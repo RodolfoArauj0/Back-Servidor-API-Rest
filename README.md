@@ -23,6 +23,8 @@ Seu papel é construir uma RESTful API que permita:
 
 **Importante 3: Sempre que a validação de uma requisição falhar, responda com código de erro e mensagem adequada à situação, ok?**
 
+**Importante 4: O link de acesso a esta API se encontra no final deste README. Este link é somente para testes (ou seja, será possível realizar requisições a esta API através do link fornecido visando AUXILIAR principalmente o desenvolvimento do desafio de Front-end, o que permitirá o desenvolvimento em paralelo de ambos os desafios)!**
+
 **Exemplo:**
 
 ```javascript
@@ -358,7 +360,7 @@ Essa é a rota que será chamada quando o usuario logado quiser listar todas as 
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[
+[
     {
         id: 1,
         descricao: "Roupas",
@@ -372,7 +374,7 @@ Essa é a rota que será chamada quando o usuario logado quiser listar todas as 
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[]
+[]
 ```
 
 ### **Listar transações do usuário logado**
@@ -405,7 +407,7 @@ Essa é a rota que será chamada quando o usuario logado quiser listar todas as 
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[
+[
     {
         id: 1,
         tipo: "saida",
@@ -431,7 +433,7 @@ Essa é a rota que será chamada quando o usuario logado quiser listar todas as 
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[]
+[]
 ```
 
 ### **Detalhar uma transação do usuário logado**
@@ -724,7 +726,7 @@ Na funcionalidade de listagem de transações do usuário logado (**GET /transac
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[
+[
     {
         id: 1,
         tipo: "saida",
@@ -750,8 +752,14 @@ Na funcionalidade de listagem de transações do usuário logado (**GET /transac
 
 ```javascript
 // HTTP Status 200 / 201 / 204
-;[]
+[]
 ```
+
+---
+
+Link do deploy da API somente para testes: [ link](https://desafio-backend-03-dindin.herokuapp.com/)
+
+**Este link é somente para testes (ou seja, será possível realizar requisições a esta API através deste link visando AUXILIAR principalmente o desenvolvimento do desafio de Front-end, o que permitirá o desenvolvimento em paralelo de ambos os desafios)!**
 
 ---
 
