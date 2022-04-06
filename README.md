@@ -718,7 +718,7 @@ Na funcionalidade de listagem de transações do usuário logado (**GET /transac
 #### **Exemplo de requisição**
 
 ```javascript
-// GET /produtos?filtro[]=roupas&filtro[]=salários
+// GET /transacao?filtro[]=roupas&filtro[]=salários
 // Sem conteúdo no corpo (body) da requisição
 ```
 
