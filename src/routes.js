@@ -9,6 +9,7 @@ routes.post('/user', registerUser);
 routes.post('/login', loginUser);
 
 routes.use(loginVerify);
+
 routes.put('/user', editProfileUser);
 routes.get('/user', detailProfileUser);
 
@@ -19,9 +20,6 @@ routes.get('/transaction/:id', detailTransaction);
 routes.post('/transaction', registerTransaction);
 routes.put('/transaction/:id', editTransaction);
 routes.delete('/transaction/:id', deleteTransaction);
-
-
-
 
 
 
