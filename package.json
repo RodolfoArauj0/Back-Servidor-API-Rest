@@ -1,0 +1,31 @@
+{
+  "name": "desafio-backend-03-dindin-t05",
+  "version": "0.0.1",
+  "description": "![](https://i.imgur.com/xG74tOh.png)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RodolfoArauj0/desafio-backend-03-dindin-t05.git"
+  },
+  "keywords": [],
+  "author": "Rodolfo Araujo / Gabriel Santos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RodolfoArauj0/desafio-backend-03-dindin-t05/issues"
+  },
+  "homepage": "https://github.com/RodolfoArauj0/desafio-backend-03-dindin-t05#readme",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.7.3",
+    "secure-password": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
