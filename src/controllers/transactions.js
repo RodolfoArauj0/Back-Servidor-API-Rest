@@ -145,15 +145,15 @@ const extractOfValues = async (req, res) => {
             return res.status(400).json({ mensgem: 'Usuário não encontrado!' });
         }
 
-        const querySumExit = `select case when tipo = 'saida' then sum(valor) else 0 end AS "saida" from transacoes group by tipo`;
+        const querySumExit = `select sum(valor) as "saida" from transacoes where tipo='saida' group by tipo`;
         const rowsExit = await connection.query(querySumExit);
 
-        const querySum = `select case when tipo = 'entrada' then sum(valor) else 0 end AS "entrada" from transacoes group by tipo`;
+        const querySum = `select sum(valor) as "entrada" from transacoes where tipo='entrada' group by tipo`;
         const rows = await connection.query(querySum);
 
         return res.status(200).json({
-            entrada: rows.rowCount === 1 ? Number(rows.rows[0].entrada) : Number(rows.rows[0].entrada),
-            saida: rowsExit.rowCount === 1 ? Number(rowsExit.rows[0].saida) : Number(rowsExit.rows[1].saida)
+            entrada: rows.rowCount && Number(rows.rows[0].entrada),
+            saida: rowsExit.rowCount && Number(rowsExit.rows[0].saida)
         });
 
     } catch (error) {
