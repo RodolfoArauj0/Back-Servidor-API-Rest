@@ -22,7 +22,6 @@ const registerUser = async (req, res) => {
         if (user.rowCount === 0) {
             return res.status(400).json({ mensagem: 'Não foi possível cadastrar usuário!' });
         }
-
         return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso!' });
 
     } catch (error) {
@@ -42,6 +41,7 @@ const loginUser = async (req, res) => {
         if (userLogin.rowCount === 0) {
             return res.status(400).json({ mensagem: 'Usuário não cadastrado!' });
         };
+
         const passworEncrypted = await bcrypt.compare(senha, userLogin.rows[0].senha);
 
         if (!passworEncrypted) {
@@ -61,12 +61,9 @@ const loginUser = async (req, res) => {
 const detailProfileUser = async (req, res) => {
     const { user } = req;
     try {
-
         res.status(200).json({ usuario: user });
-        console.log(user)
-
     } catch (error) {
-        return res.status(401).json({ mensagem: 'Token expirado...' })
+        return res.status(401).json(!authorization ? { mensagem: 'Token não informado...' } : { mensagem: 'Token expirado...' })
     }
 };
 
@@ -85,6 +82,7 @@ const editProfileUser = async (req, res) => {
         }
         if (email !== user.email) {
             const verifyEmail = await connection.query('select * from usuarios where email = $1', [email]);
+
             if (verifyEmail.rowCount > 0) {
                 return res.status(400).json({ mensagem: 'E-mail existente na base de dados...' });
             }
