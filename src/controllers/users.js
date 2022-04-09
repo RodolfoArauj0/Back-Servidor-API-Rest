@@ -54,7 +54,7 @@ const loginUser = async (req, res) => {
         return res.status(200).json({ usuario: userProps, token });
 
     } catch (error) {
-        return res.status(400).json(error.message);
+        return res.status(400).json({ "mensagem": error.message });
     }
 };
 
@@ -97,8 +97,13 @@ const editProfileUser = async (req, res) => {
         return res.status(204).json({ mensagem: 'Perfil atualizado com sucesso!' });
 
     } catch (error) {
-        return res.status(401).json(error.message)
+        return res.status(400).json({ "mensagem": error.message });
     }
 };
 
-module.exports = { registerUser, loginUser, detailProfileUser, editProfileUser }
+module.exports = {
+    registerUser,
+    loginUser,
+    detailProfileUser,
+    editProfileUser
+}

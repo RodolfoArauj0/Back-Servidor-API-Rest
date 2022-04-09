@@ -1,19 +1,25 @@
 const connection = require('../connection');
 
-
 const listTransactions = async (req, res) => {
     const { user } = req;
+    const { categoria } = req.query;
 
     try {
         const queryList = `select t.id, t.tipo, t.descricao, t.valor, t.data, 
         t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
-        left join categorias c on c.id = t.categoria_id where t.usuario_id =$1`
-
+        left join categorias c on c.id = t.categoria_id where t.usuario_id =$1`;
         const transactionList = await connection.query(queryList, [user.id]);
         if (transactionList.rowCount === 0) {
             res.status(200).json([]);
         }
+
+        if (categoria) {
+            const queryCategory = `select * from transacoes where categoria_id=$1`;
+            const listCategory = await connection.query(queryCategory, [categoria]);
+            return res.status(200).json(listCategory.rows);
+        }
         return res.status(200).json(transactionList.rows);
+
     } catch (error) {
         res.status(400).json({ "mensagem": error.message });
     }
@@ -101,7 +107,7 @@ const editTransaction = async (req, res) => {
         if (editTransaction === 0) {
             return res.status(400).json({ mensagem: 'Transação não encontrada...' })
         }
-        res.status(204).json(editTransaction.rows);
+        res.status(204).json();
 
     } catch (error) {
         return res.status(400).json({ "mensagem": error.message });
@@ -139,17 +145,21 @@ const extractOfValues = async (req, res) => {
             return res.status(400).json({ mensgem: 'Usuário não encontrado!' });
         }
 
-        const querySum = `select case when tipo = 'entrada' then sum(valor) else 0 from transacoes group by tipo`;
+        const querySumExit = `select case when tipo = 'saida' then sum(valor) else 0 end AS "saida" from transacoes group by tipo`;
+        const rowsExit = await connection.query(querySumExit);
+
+        const querySum = `select case when tipo = 'entrada' then sum(valor) else 0 end AS "entrada" from transacoes group by tipo`;
         const rows = await connection.query(querySum);
 
-        return res.status(200).json(rows);
+        return res.status(200).json({
+            entrada: rows.rowCount === 1 ? Number(rows.rows[0].entrada) : Number(rows.rows[0].entrada),
+            saida: rowsExit.rowCount === 1 ? Number(rowsExit.rows[0].saida) : Number(rowsExit.rows[1].saida)
+        });
 
     } catch (error) {
         return res.status(400).json({ "mensagem": error.message });
     }
 };
-
-
 
 module.exports = {
     registerTransaction,
