@@ -10,9 +10,8 @@ const listCategory = async (req, res) => {
         const token = authorization.replace('Bearer', '').trim();
         const { id } = jwt.verify(token, secretKey);
         if (user.id !== id) {
-            return res.status(400).json({ mensagem: 'Usuário sem autorização...' })
+            return res.status(400).json({ mensagem: 'Usuário sem autorização...' });
         }
-
         const query = await connection.query('select * from categorias');
         res.status(200).json(query.rows);
 

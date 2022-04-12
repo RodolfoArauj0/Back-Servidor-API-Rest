@@ -2,50 +2,49 @@ const connection = require('../connection');
 
 const listTransactions = async (req, res) => {
     const { user } = req;
-    const { categoria } = req.query;
+    const {id} = req.params;
+    let {filtro}  = req.query;
 
-    try {
-        const queryList = `select t.id, t.tipo, t.descricao, t.valor, t.data, 
-        t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
-        left join categorias c on c.id = t.categoria_id where t.usuario_id =$1`;
-        const transactionList = await connection.query(queryList, [user.id]);
-        if (transactionList.rowCount === 0) {
-            res.status(200).json([]);
+    if(!id){
+        try {
+            const queryList = `select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuario_id, t.categoria_id, 
+            c.descricao As "categoria_nome" from transacoes t left join categorias c on c.id = t.categoria_id 
+            where t.usuario_id =$1`;
+            const transactionList = await connection.query(queryList, [user.id]);   
+            
+            if (transactionList.rowCount === 0) {
+                res.status(200).json([]);
+            }
+    
+            if (filtro) {            
+            const queryCategory = `select t.id, t.tipo, t.descricao, t.valor, t.data, t.usuario_id, t.categoria_id, 
+            c.descricao as categoria_nome from transacoes t full join categorias c on c.id = t.categoria_id 
+            where t.usuario_id = $1 and t.categoria_id in (${filtro})`;
+            const listCategory = await connection.query(queryCategory, [user.id]);   
+                
+                return res.status(200).json(listCategory.rows);
+            } 
+            return res.status(200).json(transactionList.rows);
+    
+        } catch (error) {
+            res.status(400).json({ "mensagem": error.message });
         }
-
-        if (categoria) {
-            const queryCategory = `select * from transacoes where categoria_id=$1`;
-            const listCategory = await connection.query(queryCategory, [categoria]);
-            return res.status(200).json(listCategory.rows);
-        }
-        return res.status(200).json(transactionList.rows);
-
-    } catch (error) {
-        res.status(400).json({ "mensagem": error.message });
     }
-};
-
-const detailTransaction = async (req, res) => {
-    const { id } = req.params;
-    const { user } = req;
-
-    try {
-        await connection.query('select * from transacoes where usuario_id=$1', [user.id]);
-
-        const queryDetail = `select t.id, t.tipo, t.descricao, t.valor, t.data, 
-        t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
-        left join categorias c on c.id = t.categoria_id where t.id =$1`;
-
-        const transactionDetail = await connection.query(queryDetail, [id]);
-
-        if (transactionDetail.rowCount === 0) {
-            res.status(400).json({ mensagem: 'Transação não encontrada!' });
+    else{
+        try {
+            const queryDetail = `select t.id, t.tipo, t.descricao, t.valor, t.data, 
+            t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
+            left join categorias c on c.id = t.categoria_id where t.usuario_id = $1 and t.id =$2`;
+            const transactionDetail = await connection.query(queryDetail, [user.id, id]);
+            
+            if (transactionDetail.rowCount === 0 || !id) {
+            return res.status(400).json({ mensagem: 'Transação não encontrada!' });
+            }
+            res.status(200).json(transactionDetail.rows);
+    
+        } catch (error) {
+            return res.status(400).json({ "mensagem": error.message });
         }
-
-        res.status(200).json(transactionDetail.rows);
-
-    } catch (error) {
-        return res.status(400).json({ "mensagem": error.message });
     }
 };
 
@@ -57,11 +56,9 @@ const registerTransaction = async (req, res) => {
         if (!descricao || !valor || !data || !categoria_id || !tipo) {
             return res.status(400).json({ mensagem: 'Todos os campos são obrigatórios!' });
         }
-
         if (tipo !== "entrada" && tipo !== "saida") {
             return res.status(400).json({ mensagem: 'Tipo informado é inválido por favor, informe Entrada ou Saída!' });
         }
-
         const verifyCategory = await connection.query(`select * from categorias where id = $1`, [categoria_id]);
 
         if (verifyCategory.rowCount === 0) {
@@ -77,7 +74,11 @@ const registerTransaction = async (req, res) => {
             return res.status(400).json({ mensagem: 'Não foi possível cadastrar a transação!' });
         }
 
-        return res.status(200).json(transactionRegister.rows);
+        const query = `select t.id, t.tipo, t.descricao, t.valor, t.data, 
+        t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
+        left join categorias c on c.id = t.categoria_id where t.id =$1`;
+        const transactionRegisterUser = await connection.query(query, [transactionRegister.rows[0].id])
+        return res.status(200).json(transactionRegisterUser.rows);
 
     } catch (error) {
         return res.status(400).json({ "mensagem": error.message });
@@ -126,7 +127,7 @@ const deleteTransaction = async (req, res) => {
         }
 
         const deleteTransation = await connection.query('delete from transacoes where id =$1', [id]);
-        if (deleteTransation === 0) {
+        if (deleteTransation.rowCount === 0) {
             return res.status(400).json({ mensgem: 'Transação não encontrada!' });
         }
         return res.status(204).json({ mensagem: 'transação excluída com sucesso' });
@@ -144,12 +145,11 @@ const extractOfValues = async (req, res) => {
         if (verifyUserTransaction === 0) {
             return res.status(400).json({ mensgem: 'Usuário não encontrado!' });
         }
+        const querySumExit = `select sum(valor) as "saida" from transacoes where tipo='saida' and usuario_id = $1 group by tipo`;
+        const rowsExit = await connection.query(querySumExit,[user.id]);
 
-        const querySumExit = `select sum(valor) as "saida" from transacoes where tipo='saida' group by tipo`;
-        const rowsExit = await connection.query(querySumExit);
-
-        const querySum = `select sum(valor) as "entrada" from transacoes where tipo='entrada' group by tipo`;
-        const rows = await connection.query(querySum);
+        const querySum = `select sum(valor) as "entrada" from transacoes where tipo='entrada' and usuario_id = $1 group by tipo`;
+        const rows = await connection.query(querySum,[user.id]);
 
         return res.status(200).json({
             entrada: rows.rowCount && Number(rows.rows[0].entrada),
@@ -166,6 +166,5 @@ module.exports = {
     editTransaction,
     deleteTransaction,
     listTransactions,
-    detailTransaction,
     extractOfValues
 }

@@ -5,24 +5,22 @@ const secretKey = require('../secretKey/secret');
 
 const registerUser = async (req, res) => {
     const { nome, email, senha } = req.body;
-    const passworEncrypted = await bcrypt.hash(senha, 10);
 
-    try {
-        if (senha.length < 8) {
-            return res.json({ mensagem: 'Senha precisa ter no mínimo 8 caracteres...' })
-        }
-
+    try { 
         if (!nome || !email || !senha) {
             return res.status(400).json({ mensagem: 'Campos nome, email e senha são obrigatórios!' })
         }
-
-        const queryRegister = 'insert into usuarios (nome, email, senha) values($1,$2,$3)';
+        if (senha.length < 8) {
+            return res.json({ mensagem: 'Senha precisa ter no mínimo 8 caracteres...' })
+        }
+        const queryRegister = 'insert into usuarios (nome, email, senha) values($1,$2,$3)returning*';
+        const passworEncrypted = await bcrypt.hash(senha, 10);
         const user = await connection.query(queryRegister, [nome, email, passworEncrypted]);
-
         if (user.rowCount === 0) {
             return res.status(400).json({ mensagem: 'Não foi possível cadastrar usuário!' });
         }
-        return res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso!' });
+        const { senha: _, ...userInfo } = user.rows[0];
+        return res.status(201).json(userInfo);
 
     } catch (error) {
         return res.status(400).json({ mensagem: 'Já existe um usuário cadastrado com o e-mail informado...' })
@@ -47,7 +45,7 @@ const loginUser = async (req, res) => {
         if (!passworEncrypted) {
             return res.status(401).json({ mensagem: 'Usuário e/ou senha inválido(s)...' })
         }
-        const token = jwt.sign({ id: userLogin.rows[0].id }, secretKey, { expiresIn: '1h' });
+        const token = jwt.sign({ id: userLogin.rows[0].id }, secretKey, { expiresIn: '2h' });
 
         const { senha: _, ...userProps } = userLogin.rows[0];
 
@@ -61,7 +59,10 @@ const loginUser = async (req, res) => {
 const detailProfileUser = async (req, res) => {
     const { user } = req;
     try {
-        res.status(200).json({ usuario: user });
+        if(!user){
+    return res.status(400).json({"mensagem": "Para acessar este recurso um token de autenticação válido deve ser enviado."})
+        }
+    res.status(200).json( user );
     } catch (error) {
         return res.status(401).json(!authorization ? { mensagem: 'Token não informado...' } : { mensagem: 'Token expirado...' })
     }
