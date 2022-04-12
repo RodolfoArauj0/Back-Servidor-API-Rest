@@ -40,6 +40,7 @@ const listTransactions = async (req, res) => {
             if (transactionDetail.rowCount === 0 || !id) {
             return res.status(400).json({ mensagem: 'Transação não encontrada!' });
             }
+            
             res.status(200).json(transactionDetail.rows);
     
         } catch (error) {
