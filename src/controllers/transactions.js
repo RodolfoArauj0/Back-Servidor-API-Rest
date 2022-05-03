@@ -78,7 +78,9 @@ const registerTransaction = async (req, res) => {
         t.usuario_id, t.categoria_id, c.descricao As "categoria_nome" from transacoes t
         left join categorias c on c.id = t.categoria_id where t.id =$1`;
         const transactionRegisterUser = await connection.query(query, [transactionRegister.rows[0].id])
-        return res.status(200).json(transactionRegisterUser.rows);
+
+        const { ...infoReg } = transactionRegisterUser.rows[0];
+        return res.status(200).json(infoReg);
 
     } catch (error) {
         return res.status(400).json({ "mensagem": error.message });
